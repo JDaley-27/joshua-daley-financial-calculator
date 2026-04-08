@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Josh Daley Financial Calculator</title>
+  <style>
+    body {
+      font-family: Arial;
+      margin: 40px;
+      background: #f4f6f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      margin: 20px auto;
+      width: 400px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input {
+      width: 100%;
+      margin: 5px 0;
+      padding: 8px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      width: 100%;
+      background: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Josh Daley Financial Calculator</h1>
+
+<div class="box">
+  <h3>Holding Period Return</h3>
+  <input id="start" placeholder="Starting Price">
+  <input id="end" placeholder="Ending Price">
+  <button onclick="calcReturn()">Calculate</button>
+  <p id="returnResult"></p>
+</div>
+
+<div class="box">
+  <h3>Volatility (Standard Deviation)</h3>
+  <input id="returns" placeholder="Enter returns (comma separated)">
+  <button onclick="calcVol()">Calculate</button>
+  <p id="volResult"></p>
+</div>
+
+<div class="box">
+  <h3>Sharpe Ratio</h3>
+  <input id="avgReturn" placeholder="Average Return">
+  <input id="riskFree" placeholder="Risk-Free Rate">
+  <input id="stdDev" placeholder="Standard Deviation">
+  <button onclick="calcSharpe()">Calculate</button>
+  <p id="sharpeResult"></p>
+</div>
+
+<script>
+function calcReturn() {
+  let start = parseFloat(document.getElementById("start").value);
+  let end = parseFloat(document.getElementById("end").value);
+  let result = (end - start) / start;
+  document.getElementById("returnResult").innerText =
+    "Return: " + (result * 100).toFixed(2) + "%";
+}
+
+function calcVol() {
+  let data = document.getElementById("returns").value.split(',').map(Number);
+  let mean = data.reduce((a,b)=>a+b)/data.length;
+  let variance = data.reduce((a,b)=>a+(b-mean)**2,0)/data.length;
+  let std = Math.sqrt(variance);
+  document.getElementById("volResult").innerText =
+    "Volatility: " + std.toFixed(4);
+}
+
+function calcSharpe() {
+  let r = parseFloat(document.getElementById("avgReturn").value);
+  let rf = parseFloat(document.getElementById("riskFree").value);
+  let sd = parseFloat(document.getElementById("stdDev").value);
+  let sharpe = (r - rf) / sd;
+  document.getElementById("sharpeResult").innerText =
+    "Sharpe Ratio: " + sharpe.toFixed(4);
+}
+</script>
+
+</body>
+</html>
