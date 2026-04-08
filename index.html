@@ -2,84 +2,182 @@
 <html>
 <head>
   <title>Josh Daley Financial Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
-      font-family: Arial;
-      margin: 40px;
-      background: #f4f6f9;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
     }
-    h1 {
-      text-align: center;
-    }
-    .box {
-      background: white;
+
+    header {
+      background: #161b22;
       padding: 20px;
-      margin: 20px auto;
-      width: 400px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      border-bottom: 1px solid #30363d;
     }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #161b22;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      border: 1px solid #30363d;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #58a6ff;
+    }
+
     input {
       width: 100%;
-      margin: 5px 0;
-      padding: 8px;
-    }
-    button {
-      margin-top: 10px;
       padding: 10px;
-      width: 100%;
-      background: #007BFF;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #30363d;
+      background: #0d1117;
       color: white;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #238636;
       border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
       cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #2ea043;
+    }
+
+    .result {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #3fb950;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      background: #161b22;
+      cursor: pointer;
+      border: 1px solid #30363d;
+    }
+
+    .tab.active {
+      background: #238636;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
     }
   </style>
 </head>
 
 <body>
 
-<h1>Josh Daley Financial Calculator</h1>
+<header>Josh Daley Financial Calculator</header>
 
-<div class="box">
-  <h3>Holding Period Return</h3>
-  <input id="start" placeholder="Starting Price">
-  <input id="end" placeholder="Ending Price">
-  <button onclick="calcReturn()">Calculate</button>
-  <p id="returnResult"></p>
-</div>
+<div class="container">
 
-<div class="box">
-  <h3>Volatility (Standard Deviation)</h3>
-  <input id="returns" placeholder="Enter returns (comma separated)">
-  <button onclick="calcVol()">Calculate</button>
-  <p id="volResult"></p>
-</div>
+  <div class="tabs">
+    <div class="tab active" onclick="showSection('returns', this)">Returns</div>
+    <div class="tab" onclick="showSection('risk', this)">Risk</div>
+    <div class="tab" onclick="showSection('performance', this)">Performance</div>
+  </div>
 
-<div class="box">
-  <h3>Sharpe Ratio</h3>
-  <input id="avgReturn" placeholder="Average Return">
-  <input id="riskFree" placeholder="Risk-Free Rate">
-  <input id="stdDev" placeholder="Standard Deviation">
-  <button onclick="calcSharpe()">Calculate</button>
-  <p id="sharpeResult"></p>
+  <!-- RETURNS -->
+  <div id="returns" class="section active">
+
+    <div class="card">
+      <h2>Holding Period Return</h2>
+      <input id="start" placeholder="Starting Price">
+      <input id="end" placeholder="Ending Price">
+      <button onclick="calcReturn()">Calculate</button>
+      <div id="returnResult" class="result"></div>
+    </div>
+
+  </div>
+
+  <!-- RISK -->
+  <div id="risk" class="section">
+
+    <div class="card">
+      <h2>Volatility (Standard Deviation)</h2>
+      <input id="returnsData" placeholder="e.g. 0.05, 0.02, -0.01">
+      <button onclick="calcVol()">Calculate</button>
+      <div id="volResult" class="result"></div>
+    </div>
+
+  </div>
+
+  <!-- PERFORMANCE -->
+  <div id="performance" class="section">
+
+    <div class="card">
+      <h2>Sharpe Ratio</h2>
+      <input id="avgReturn" placeholder="Average Return">
+      <input id="riskFree" placeholder="Risk-Free Rate">
+      <input id="stdDev" placeholder="Standard Deviation">
+      <button onclick="calcSharpe()">Calculate</button>
+      <div id="sharpeResult" class="result"></div>
+    </div>
+
+  </div>
+
 </div>
 
 <script>
+function showSection(id, element) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  element.classList.add('active');
+}
+
 function calcReturn() {
   let start = parseFloat(document.getElementById("start").value);
   let end = parseFloat(document.getElementById("end").value);
   let result = (end - start) / start;
   document.getElementById("returnResult").innerText =
-    "Return: " + (result * 100).toFixed(2) + "%";
+    (result * 100).toFixed(2) + "%";
 }
 
 function calcVol() {
-  let data = document.getElementById("returns").value.split(',').map(Number);
+  let data = document.getElementById("returnsData").value.split(',').map(Number);
   let mean = data.reduce((a,b)=>a+b)/data.length;
   let variance = data.reduce((a,b)=>a+(b-mean)**2,0)/data.length;
   let std = Math.sqrt(variance);
   document.getElementById("volResult").innerText =
-    "Volatility: " + std.toFixed(4);
+    std.toFixed(4);
 }
 
 function calcSharpe() {
@@ -88,7 +186,7 @@ function calcSharpe() {
   let sd = parseFloat(document.getElementById("stdDev").value);
   let sharpe = (r - rf) / sd;
   document.getElementById("sharpeResult").innerText =
-    "Sharpe Ratio: " + sharpe.toFixed(4);
+    sharpe.toFixed(4);
 }
 </script>
 
