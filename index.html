@@ -1,47 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Josh Daley Financial Calculator</title>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Josh Daley Financial Calculator</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      background: #0d1117;
+      font-family: 'Inter', sans-serif;
+      background: #0b0f19;
       color: #e6edf3;
     }
 
     header {
-      background: #161b22;
+      background: linear-gradient(90deg, #1f6feb, #238636);
       padding: 20px;
       text-align: center;
       font-size: 28px;
-      font-weight: bold;
-      border-bottom: 1px solid #30363d;
+      font-weight: 600;
+      color: white;
+      letter-spacing: 1px;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1000px;
       margin: auto;
       padding: 20px;
     }
 
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      background: #161b22;
+      cursor: pointer;
+      border: 1px solid #30363d;
+      transition: 0.3s;
+      font-weight: 500;
+    }
+
+    .tab:hover {
+      background: #1f6feb;
+    }
+
+    .tab.active {
+      background: #238636;
+      color: white;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
     .card {
       background: #161b22;
-      padding: 20px;
+      padding: 25px;
       margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      border-radius: 14px;
       border: 1px solid #30363d;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
 
     h2 {
-      margin-top: 0;
       color: #58a6ff;
+      margin-top: 0;
     }
 
-    input {
+    input, textarea {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
@@ -49,6 +90,7 @@
       border: 1px solid #30363d;
       background: #0d1117;
       color: white;
+      font-size: 14px;
     }
 
     button {
@@ -59,9 +101,9 @@
       border: none;
       border-radius: 6px;
       color: white;
-      font-weight: bold;
+      font-weight: 600;
       cursor: pointer;
-      transition: 0.2s;
+      transition: 0.3s;
     }
 
     button:hover {
@@ -69,90 +111,105 @@
     }
 
     .result {
-      margin-top: 10px;
+      margin-top: 12px;
       font-size: 18px;
       color: #3fb950;
+      font-weight: 500;
     }
 
-    .tabs {
-      display: flex;
-      margin-bottom: 20px;
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
 
-    .tab {
-      flex: 1;
-      padding: 12px;
-      text-align: center;
-      background: #161b22;
-      cursor: pointer;
-      border: 1px solid #30363d;
-    }
-
-    .tab.active {
-      background: #238636;
-    }
-
-    .section {
-      display: none;
-    }
-
-    .section.active {
-      display: block;
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
-
 <body>
 
 <header>Josh Daley Financial Calculator</header>
 
 <div class="container">
-
   <div class="tabs">
     <div class="tab active" onclick="showSection('returns', this)">Returns</div>
     <div class="tab" onclick="showSection('risk', this)">Risk</div>
     <div class="tab" onclick="showSection('performance', this)">Performance</div>
+    <div class="tab" onclick="showSection('analysis', this)">Analysis</div>
   </div>
 
   <!-- RETURNS -->
   <div id="returns" class="section active">
-
     <div class="card">
       <h2>Holding Period Return</h2>
-      <input id="start" placeholder="Starting Price">
-      <input id="end" placeholder="Ending Price">
-      <button onclick="calcReturn()">Calculate</button>
-      <div id="returnResult" class="result"></div>
+      <div class="grid-2">
+        <input id="startPrice" placeholder="Starting Price">
+        <input id="endPrice" placeholder="Ending Price">
+      </div>
+      <button onclick="calcHoldingReturn()">Calculate</button>
+      <div id="holdingResult" class="result"></div>
     </div>
-
   </div>
 
   <!-- RISK -->
   <div id="risk" class="section">
-
     <div class="card">
       <h2>Volatility (Standard Deviation)</h2>
-      <input id="returnsData" placeholder="e.g. 0.05, 0.02, -0.01">
-      <button onclick="calcVol()">Calculate</button>
-      <div id="volResult" class="result"></div>
+      <textarea id="returnsData" placeholder="Enter returns separated by commas (e.g., 0.05, 0.02, -0.01)"></textarea>
+      <button onclick="calcVolatility()">Calculate</button>
+      <div id="volatilityResult" class="result"></div>
     </div>
-
   </div>
 
   <!-- PERFORMANCE -->
   <div id="performance" class="section">
-
     <div class="card">
       <h2>Sharpe Ratio</h2>
-      <input id="avgReturn" placeholder="Average Return">
-      <input id="riskFree" placeholder="Risk-Free Rate">
-      <input id="stdDev" placeholder="Standard Deviation">
+      <div class="grid-2">
+        <input id="avgReturn" placeholder="Average Return">
+        <input id="riskFree" placeholder="Risk-Free Rate">
+        <input id="stdDev" placeholder="Standard Deviation">
+      </div>
       <button onclick="calcSharpe()">Calculate</button>
       <div id="sharpeResult" class="result"></div>
     </div>
-
   </div>
 
+  <!-- ANALYSIS -->
+  <div id="analysis" class="section">
+
+    <!-- Time-Series Return -->
+    <div class="card">
+      <h2>Time-Series Return</h2>
+      <div class="grid-2">
+        <input id="tsStart" placeholder="Starting Price or Value">
+        <input id="tsEnd" placeholder="Ending Price or Value">
+      </div>
+      <button onclick="calcTimeSeries()">Calculate</button>
+      <div id="tsResult" class="result"></div>
+    </div>
+
+    <!-- Cross-Sectional Comparison -->
+    <div class="card">
+      <h2>Comparison of Multiple Assets</h2>
+      <textarea id="assetReturns" placeholder="Enter returns for multiple assets (e.g., AAPL:0.12, MSFT:0.10, SPY:0.08)"></textarea>
+      <button onclick="compareAssets()">Compare</button>
+      <div id="comparisonResult" class="result"></div>
+    </div>
+
+    <!-- Portfolio Returns -->
+    <div class="card">
+      <h2>Simple Portfolio Return</h2>
+      <textarea id="portfolioData" placeholder="Enter weights and returns (e.g., AAPL:0.5:0.12, MSFT:0.5:0.10)"></textarea>
+      <button onclick="calcPortfolio()">Calculate</button>
+      <div id="portfolioResult" class="result"></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
@@ -163,30 +220,122 @@ function showSection(id, element) {
   element.classList.add('active');
 }
 
-function calcReturn() {
-  let start = parseFloat(document.getElementById("start").value);
-  let end = parseFloat(document.getElementById("end").value);
-  let result = (end - start) / start;
-  document.getElementById("returnResult").innerText =
-    (result * 100).toFixed(2) + "%";
+// Holding Period Return
+function calcHoldingReturn() {
+  const start = parseFloat(document.getElementById("startPrice").value);
+  const end = parseFloat(document.getElementById("endPrice").value);
+  if (isNaN(start) || isNaN(end) || start === 0) {
+    document.getElementById("holdingResult").innerText = "Please enter valid values.";
+    return;
+  }
+  const result = (end - start) / start;
+  document.getElementById("holdingResult").innerText =
+    "Return: " + (result * 100).toFixed(2) + "%";
 }
 
-function calcVol() {
-  let data = document.getElementById("returnsData").value.split(',').map(Number);
-  let mean = data.reduce((a,b)=>a+b)/data.length;
-  let variance = data.reduce((a,b)=>a+(b-mean)**2,0)/data.length;
-  let std = Math.sqrt(variance);
-  document.getElementById("volResult").innerText =
-    std.toFixed(4);
+// Volatility
+function calcVolatility() {
+  const data = document.getElementById("returnsData").value
+    .split(',')
+    .map(Number)
+    .filter(n => !isNaN(n));
+
+  if (data.length < 2) {
+    document.getElementById("volatilityResult").innerText = "Enter at least two returns.";
+    return;
+  }
+
+  const mean = data.reduce((a, b) => a + b) / data.length;
+  const variance = data.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (data.length - 1);
+  const std = Math.sqrt(variance);
+
+  document.getElementById("volatilityResult").innerText =
+    "Volatility: " + std.toFixed(4);
 }
 
+// Sharpe Ratio
 function calcSharpe() {
-  let r = parseFloat(document.getElementById("avgReturn").value);
-  let rf = parseFloat(document.getElementById("riskFree").value);
-  let sd = parseFloat(document.getElementById("stdDev").value);
-  let sharpe = (r - rf) / sd;
+  const r = parseFloat(document.getElementById("avgReturn").value);
+  const rf = parseFloat(document.getElementById("riskFree").value);
+  const sd = parseFloat(document.getElementById("stdDev").value);
+
+  if (isNaN(r) || isNaN(rf) || isNaN(sd) || sd === 0) {
+    document.getElementById("sharpeResult").innerText = "Please enter valid values.";
+    return;
+  }
+
+  const sharpe = (r - rf) / sd;
   document.getElementById("sharpeResult").innerText =
-    sharpe.toFixed(4);
+    "Sharpe Ratio: " + sharpe.toFixed(4);
+}
+
+// Time-Series Return
+function calcTimeSeries() {
+  const start = parseFloat(document.getElementById("tsStart").value);
+  const end = parseFloat(document.getElementById("tsEnd").value);
+
+  if (isNaN(start) || isNaN(end) || start === 0) {
+    document.getElementById("tsResult").innerText = "Please enter valid values.";
+    return;
+  }
+
+  const result = (end - start) / start;
+  document.getElementById("tsResult").innerText =
+    "Time-Series Return: " + (result * 100).toFixed(2) + "%";
+}
+
+// Cross-Sectional Comparison
+function compareAssets() {
+  const input = document.getElementById("assetReturns").value;
+  const assets = input.split(',').map(item => {
+    const [name, value] = item.split(':');
+    return { name: name.trim(), value: parseFloat(value) };
+  }).filter(a => a.name && !isNaN(a.value));
+
+  if (assets.length === 0) {
+    document.getElementById("comparisonResult").innerText = "Please enter valid data.";
+    return;
+  }
+
+  assets.sort((a, b) => b.value - a.value);
+
+  const output = assets.map(a =>
+    `${a.name}: ${(a.value * 100).toFixed(2)}%`
+  ).join(' | ');
+
+  document.getElementById("comparisonResult").innerText = output;
+}
+
+// Portfolio Return
+function calcPortfolio() {
+  const input = document.getElementById("portfolioData").value;
+  const assets = input.split(',').map(item => {
+    const [name, weight, ret] = item.split(':');
+    return {
+      name: name.trim(),
+      weight: parseFloat(weight),
+      ret: parseFloat(ret)
+    };
+  }).filter(a => a.name && !isNaN(a.weight) && !isNaN(a.ret));
+
+  if (assets.length === 0) {
+    document.getElementById("portfolioResult").innerText = "Please enter valid data.";
+    return;
+  }
+
+  const totalWeight = assets.reduce((sum, a) => sum + a.weight, 0);
+  if (Math.abs(totalWeight - 1) > 0.01) {
+    document.getElementById("portfolioResult").innerText =
+      "Weights should sum to 1.";
+    return;
+  }
+
+  const portfolioReturn = assets.reduce(
+    (sum, a) => sum + a.weight * a.ret, 0
+  );
+
+  document.getElementById("portfolioResult").innerText =
+    "Portfolio Return: " + (portfolioReturn * 100).toFixed(2) + "%";
 }
 </script>
 
