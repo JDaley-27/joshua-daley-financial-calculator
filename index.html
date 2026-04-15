@@ -140,6 +140,7 @@
     <div class="tab" onclick="showSection('risk', this)">Risk</div>
     <div class="tab" onclick="showSection('performance', this)">Performance</div>
     <div class="tab" onclick="showSection('analysis', this)">Analysis</div>
+    <div class="tab" onclick="showSection('capm', this)">CAPM</div>
   </div>
 
   <!-- RETURNS -->
@@ -208,10 +209,30 @@
       <button onclick="calcPortfolio()">Calculate</button>
       <div id="portfolioResult" class="result"></div>
     </div>
+    
+<!-- CAPM ANALYSIS -->
+<div id="capm" class="section">
+  <div class="card">
+    <h2>Beta Calculation</h2>
+    <p>Enter periodic returns for the stock and the market (comma separated).</p>
+    <textarea id="stockReturns" placeholder="Stock Returns (e.g., 0.05, 0.02, -0.01)"></textarea>
+    <textarea id="marketReturns" placeholder="Market Returns (e.g., 0.04, 0.01, -0.02)"></textarea>
+    <button onclick="calcBeta()">Calculate Beta</button>
+    <div id="betaResult" class="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>CAPM Alpha</h2>
+    <input id="avgStockReturn" placeholder="Average Stock Return (e.g., 0.12)">
+    <input id="avgMarketReturn" placeholder="Average Market Return (e.g., 0.08)">
+    <input id="riskFreeRate" placeholder="Risk-Free Rate (e.g., 0.02)">
+    <input id="betaInput" placeholder="Beta (auto-filled if calculated)">
+    <button onclick="calcAlpha()">Calculate Alpha</button>
+    <div id="alphaResult" class="result"></div>
 
   </div>
 </div>
-
+    
 <script>
 function showSection(id, element) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -336,6 +357,67 @@ function calcPortfolio() {
 
   document.getElementById("portfolioResult").innerText =
     "Portfolio Return: " + (portfolioReturn * 100).toFixed(2) + "%";
+}
+  // Helper function to parse comma-separated returns
+function parseReturns(inputId) {
+  return document.getElementById(inputId).value
+    .split(',')
+    .map(Number)
+    .filter(n => !isNaN(n));
+}
+
+// Calculate Beta
+function calcBeta() {
+  const stock = parseReturns("stockReturns");
+  const market = parseReturns("marketReturns");
+
+  if (stock.length !== market.length || stock.length < 2) {
+    document.getElementById("betaResult").innerText =
+      "Please enter equal numbers of valid returns.";
+    return;
+  }
+
+  const meanStock = stock.reduce((a, b) => a + b) / stock.length;
+  const meanMarket = market.reduce((a, b) => a + b) / market.length;
+
+  let covariance = 0;
+  let varianceMarket = 0;
+
+  for (let i = 0; i < stock.length; i++) {
+    covariance += (stock[i] - meanStock) * (market[i] - meanMarket);
+    varianceMarket += Math.pow(market[i] - meanMarket, 2);
+  }
+
+  covariance /= (stock.length - 1);
+  varianceMarket /= (market.length - 1);
+
+  const beta = covariance / varianceMarket;
+
+  document.getElementById("betaResult").innerText =
+    "Beta: " + beta.toFixed(4);
+
+  // Auto-fill beta for alpha calculation
+  document.getElementById("betaInput").value = beta.toFixed(4);
+}
+
+// Calculate CAPM Alpha
+function calcAlpha() {
+  const Ri = parseFloat(document.getElementById("avgStockReturn").value);
+  const Rm = parseFloat(document.getElementById("avgMarketReturn").value);
+  const Rf = parseFloat(document.getElementById("riskFreeRate").value);
+  const beta = parseFloat(document.getElementById("betaInput").value);
+
+  if ([Ri, Rm, Rf, beta].some(isNaN)) {
+    document.getElementById("alphaResult").innerText =
+      "Please enter valid numeric values.";
+    return;
+  }
+
+  const expectedReturn = Rf + beta * (Rm - Rf);
+  const alpha = Ri - expectedReturn;
+
+  document.getElementById("alphaResult").innerText =
+    "CAPM Alpha: " + (alpha * 100).toFixed(2) + "%";
 }
 </script>
 
